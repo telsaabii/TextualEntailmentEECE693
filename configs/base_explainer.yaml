@@ -1,0 +1,13 @@
+model_name: "t5-base"
+train_csv: "data/processed/explainer_train.csv"
+dev_csv: "data/processed/explainer_dev.csv"
+output_dir: "checkpoints/explainer"
+batch_size: 8
+lr: 3e-5
+epochs: 3
+max_len: 128
+target_max_len: 64
+eval_steps: 1000
+device: "cuda"
+use_wandb: false
+wandb_project: "explainable-nli"

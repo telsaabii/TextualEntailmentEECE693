@@ -1,0 +1,14 @@
+torch>=1.10
+transformers>=4.25
+tqdm
+pandas
+numpy
+PyYAML
+scikit-learn
+rouge-score
+nltk
+sacrebleu
+wandb
+matplotlib
+fastapi
+uvicorn

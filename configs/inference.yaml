@@ -1,0 +1,11 @@
+explainer_model_path: "checkpoints/explainer"
+predictor_model_path: "checkpoints/predictor"
+
+# tweak generation settings:
+explainer:
+  max_length: 64
+  num_beams: 2
+
+predictor:
+  max_length: 5
+  num_beams: 1
