@@ -1,6 +1,6 @@
 # 📚 Two-Stage Textual Entailment with Explainability
 
-This project implements **two-stage textual entailment** using **T5 models** on the **e-SNLI dataset**. It is designed for research and educational use (EECE 693).
+This project implements **two-stage textual entailment** using **T5 models** on the **e-SNLI dataset** with further finetuning on a custom philosophy dataset. It is designed for research and educational use (EECE 693).
 
 ## 🔍 Project Goals
 
