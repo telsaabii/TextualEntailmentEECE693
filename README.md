@@ -1,6 +1,6 @@
 # 📚 Two-Stage Textual Entailment with Explainability
 
-This project implements **two-stage textual entailment** using **T5 models** on the **e-SNLI dataset** with further finetuning on a custom philosophy dataset. It is designed for research and educational use (EECE 693).
+In this project, we adopt a two-stage approach to textual entailment by first generating human-readable explanations using a T5-based explainer model, and subsequently using those explanations as input to a second T5-based predictor model that classifies the entailment label. This architecture is inspired by the structure of the e-SNLI dataset, which uniquely includes natural language explanations alongside premise-hypothesis-label triples. While most NLI systems leverage only the final label, our approach captures the intermediate reasoning process that humans often rely on when making inferences. This modular setup enhances interpretability and allows for controlled experimentation—such as ablation studies comparing prediction accuracy with and without explanations. By separating the explanation and classification stages, we enable fine-grained analysis of model behavior, attention patterns, and explanation quality, making this architecture highly suitable for explainable AI research and transferable to more philosophical or ethical reasoning domains which we will also explore.
 
 ## 🔍 Project Goals
 
