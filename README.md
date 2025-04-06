@@ -4,7 +4,7 @@ This project implements **two-stage textual entailment** using **T5 models** on 
 
 ## 🔍 Project Goals
 
-1. **Generate human-readable explanations** for why a premise entails, contradicts, or is neutral to a hypothesis.
+1. **Generate human-readable explanations** for why a premise entails, contradicts, or is neutral to a hypothesis (Stage 1).
 2. **Use those explanations** to improve the accuracy and interpretability of final **entailment label predictions** (Stage 2).
 
 ---
