@@ -1,11 +1,16 @@
 explainer_model_path: "checkpoints/explainer"
 predictor_model_path: "checkpoints/predictor"
 
-# tweak generation settings:
 explainer:
   max_length: 64
   num_beams: 2
+  do_sample: true # new
+  temperature: 0.8 # new
+  top_k: 50 # optional
+  top_p: 0.95 # optional
 
 predictor:
   max_length: 5
   num_beams: 1
+  do_sample: false # default for deterministic classification
+  temperature: 1.0 # not needed unless sampling
