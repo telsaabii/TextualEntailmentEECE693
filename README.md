@@ -7,6 +7,10 @@ In this project, we adopt a two-stage approach to textual entailment by first ge
 1. **Generate human-readable explanations** for why a premise entails, contradicts, or is neutral to a hypothesis (Stage 1).
 2. **Use those explanations** to improve the accuracy and interpretability of final **entailment label predictions** (Stage 2).
 
+Through this project, we are hoping to address the following:
+1. How does the quality and nature of reasoning differ between a model trained solely on e-SNLI and one fine-tuned on a philosophy-specific entailment dataset?
+2. Does explicitly generating natural language explanations (reasoning) improve the model’s performance on entailment classification tasks?
+3. What attention patterns are associated with different entailment labels, and how do these patterns differ between everyday (e-SNLI) and philosophical reasoning?
 ---
 
 ## 📁 Folder Structure & Purpose
