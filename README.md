@@ -1,6 +1,6 @@
 # 📚 Two-Stage Textual Entailment with Explainability
 
-In this project, we adopt a two-stage approach to textual entailment by first generating human-readable explanations using a T5-based explainer model, and subsequently using those explanations as input to a second T5-based predictor model that classifies the entailment label. This architecture is inspired by the structure of the e-SNLI dataset, which uniquely includes natural language explanations alongside premise-hypothesis-label triples. While most NLI systems leverage only the final label, our approach captures the intermediate reasoning process that humans often rely on when making inferences. This modular setup enhances interpretability and allows for controlled experimentation—such as ablation studies comparing prediction accuracy with and without explanations. By separating the explanation and classification stages, we enable fine-grained analysis of model behavior, attention patterns, and explanation quality, making this architecture highly suitable for explainable AI research and transferable to more philosophical or ethical reasoning domains which we will also explore.
+In this project, we adopt a two-stage approach to textual entailment by first generating human-readable explanations using a T5-based explainer model, and subsequently using those explanations as input to a second T5-based predictor model that classifies the entailment label. This architecture is inspired by the structure of the e-SNLI dataset, which uniquely includes natural language explanations alongside premise-hypothesis-label triples. While most NLI systems leverage only the final label, our approach captures the intermediate reasoning process that humans often rely on when making inferences. This modular setup enhances interpretability and allows for controlled experimentation—such as ablation studies comparing prediction accuracy with and without explanations. By separating the explanation and classification stages, we enable fine-grained analysis of model behavior, attention patterns, and explanation quality, making this architecture highly suitable for explainable AI research and transferable to more philosophical or ethical reasoning domains which we also explore.
 
 ## 🔍 Project Goals
 
@@ -11,6 +11,7 @@ Through this project, we are hoping to address the following:
 1. How does the quality and nature of reasoning differ between a model trained solely on e-SNLI and one fine-tuned on a philosophy-specific entailment dataset?
 2. Does explicitly generating natural language explanations (reasoning) improve the model’s performance on entailment classification tasks?
 3. What attention patterns are associated with different entailment labels, and how do these patterns differ between everyday (e-SNLI) and philosophical reasoning?
+
 ---
 
 ## 📁 Folder Structure & Purpose
@@ -26,8 +27,6 @@ Through this project, we are hoping to address the following:
 **Contents:**
 - `pytorch_model.bin`, `config.json`, `tokenizer_config.json`, etc.
 
-> ✅ **Future**: These checkpoints are used in inference or future fine-tuning.
-
 ---
 
 ### `configs/`
@@ -35,9 +34,8 @@ Through this project, we are hoping to address the following:
 
 - `base_explainer.yaml`, `custom_explainer.yaml`: Hyperparams for Stage 1 training
 - `base_predictor.yaml`, `custom_predictor.yaml`: Hyperparams for Stage 2 training
+- `base_vanilla.yaml`: Config for vanilla label prediction from premise + hypothesis
 - `inference.yaml`: Inference model paths and generation settings (beam size, max length)
-
-> ✅ **Future**: Add more configs for experiments with different learning rates, epochs, etc.
 
 ---
 
@@ -48,13 +46,13 @@ Through this project, we are hoping to address the following:
 - Preprocessed CSVs from e-SNLI:
   - `esnli_train_1.csv`, `esnli_train_2.csv`
   - `esnli_dev.csv`, `esnli_test.csv`
+  - `predictor_train.csv`, `predictor_dev.csv`, `predictor_test.csv`
+  - `explainer_train.csv`, `explainer_dev.csv`, `explainer_test.csv`
 
 #### Key Scripts:
 - `2StageDataPrep.py`: Prepares data for explainer/predictor stages
 - `explainer_dataset.py`: PyTorch `Dataset` for generating explanations
 - `predictor_dataset.py`: PyTorch `Dataset` for predicting labels using explanations
-
-> ✅ **Future**: Extend for other domains (e.g., philosophy), or add data augmentation.
 
 ---
 
@@ -65,8 +63,6 @@ Through this project, we are hoping to address the following:
 - `attention_eval.py`: Visualizes attention weights from T5 (cross-attention heatmaps)
 - `ablation_eval.py`: Compares label prediction accuracy **with vs. without** explanations
 
-> ✅ **Future**: Add more evaluation metrics (faithfulness, plausibility, etc.).
-
 ---
 
 ### `inference/`
@@ -76,27 +72,27 @@ Through this project, we are hoping to address the following:
   1. Generates explanation using Explainer model
   2. Predicts label using Predictor model + generated explanation
 
-> ✅ **Future**: Extend with single-stage or batched inference, ensemble experiments.
+---
+
+### `Philosophy/`
+**Purpose:** Hosts the **philosophical NLI dataset** for entailment tasks grounded in philosophical reasoning and ethics.
 
 ---
 
 ### `trainingscripts/`
-**Purpose:** Contains training logic for both model stages.
+**Purpose:** Contains training logic for different model variants.
 
 - `train_explainer.py`: Trains the T5 Explainer model using `base_explainer.yaml`
 - `train_predictor.py`: Trains the T5 Predictor model using `base_predictor.yaml`
-
-> ✅ **Future**: Add variants for multitask learning, early stopping, larger models, etc.
+- `train_vanilla.py`: Trains a single-stage vanilla T5 model using `base_vanilla.yaml`
 
 ---
 
 ### `WebApp.py`
 **Purpose:** Placeholder for turning the system into a **web API** or **demo app**.
 
-- 🧠 Idea: Load explainer/predictor models once, and serve predictions via a web route.
-- 📦 Return explanation and label in a structured response.
-
-> ✅ **Future**: Integrate with **FastAPI** or **Flask** for a working UI or API.
+- Idea: Load explainer/predictor models once, and serve predictions via a web route.
+- Return explanation and label in a structured response.
 
 ---
 
@@ -115,4 +111,4 @@ Through this project, we are hoping to address the following:
 
 ## 👥 Authors / Contributors
 
-- 
+-
