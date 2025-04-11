@@ -93,13 +93,13 @@ def main():
 
     # Load data
     train_data = ExplainerDataset(
-        csv_path=config["train_csv"],
+        csv_path=config["data/processed/explainer_train.csv"],
         tokenizer_name=config["model_name"],
         max_len=config["max_len"],
         target_max_len=config["target_max_len"]
     )
     dev_data = ExplainerDataset(
-        csv_path=config["dev_csv"],
+        csv_path=config["data/processed/explainer_dev.csv"],
         tokenizer_name=config["model_name"],
         max_len=config["max_len"],
         target_max_len=config["target_max_len"]
