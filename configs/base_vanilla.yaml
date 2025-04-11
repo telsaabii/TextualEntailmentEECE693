@@ -1,0 +1,14 @@
+# Configuration for NLI predictor model
+model_name: "t5-base"
+train_csv: "data/processed/predictor_train.csv"
+dev_csv: "data/processed/predictor_dev.csv"
+output_dir: "checkpoints/vanilla"
+batch_size: 8
+lr: 3e-5
+epochs: 3
+max_len: 128
+target_max_len: 10
+eval_steps: 1000
+device: "cuda"
+use_wandb: true
+wandb_project: "vanilla-nli"
