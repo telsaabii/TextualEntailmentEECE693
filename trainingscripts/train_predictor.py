@@ -64,27 +64,30 @@ def evaluate(model, tokenizer, dev_loader, device):
     logger.info(f"Dev Accuracy: {accuracy:.4f}")
     logger.info("\n" + classification_report(all_labels, all_preds, zero_division=0))
     model.train()
+    return accuracy
 
 def main():
-    model_name = "t5-base"
-    output_dir = "checkpoints/predictor"
-
-    tokenizer = T5Tokenizer.from_pretrained(model_name)
-    model = T5ForConditionalGeneration.from_pretrained(model_name)
-
     args = parse_args()
     config = load_config(args.config)
     logger.info(f"Loaded config from {args.config}: {config}")
 
-    # Optional: integrate wandb
-    if config.get("use_wandb", False):
-        import wandb
-        wandb.init(project=config.get("wandb_project", "explainable-nli"))
-        wandb.config.update(config)
+    # Create output directories
+    output_dir = config.get("output_dir", "checkpoints/predictor")
+    os.makedirs(output_dir, exist_ok=True)
+    best_model_dir = os.path.join(output_dir, "best")
+    final_model_dir = os.path.join(output_dir, "final")
+    os.makedirs(best_model_dir, exist_ok=True)
+    os.makedirs(final_model_dir, exist_ok=True)
 
     device = config["device"]
     tokenizer = T5Tokenizer.from_pretrained(config["model_name"])
     model = T5ForConditionalGeneration.from_pretrained(config["model_name"]).to(device)
+
+    # Optional: integrate wandb
+    if config.get("use_wandb", False):
+        import wandb
+        wandb.init(project=config.get("wandb_project", "predictor-nli"))
+        wandb.config.update(config)
 
     # Load data
     train_data = PredictorDataset(
@@ -105,9 +108,15 @@ def main():
 
     optimizer = AdamW(model.parameters(), lr=config["lr"])
 
+    # For tracking best model
+    best_accuracy = 0.0
+    best_step = 0
+
     global_step = 0
     for epoch in range(config["epochs"]):
         logger.info(f"Epoch {epoch + 1}/{config['epochs']}")
+        model.train()
+        
         for batch in tqdm(train_loader):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
@@ -127,14 +136,39 @@ def main():
 
             if global_step % config["eval_steps"] == 0:
                 logger.info(f"Step {global_step} | Train Loss: {loss.item():.4f}")
-                evaluate(model, tokenizer, dev_loader, device)
+                current_accuracy = evaluate(model, tokenizer, dev_loader, device)
+                
+                # Save best model
+                if current_accuracy > best_accuracy:
+                    best_accuracy = current_accuracy
+                    best_step = global_step
+                    logger.info(f"New best model at step {global_step} with accuracy {best_accuracy:.4f}")
+                    model.save_pretrained(best_model_dir)
+                    tokenizer.save_pretrained(best_model_dir)
 
+    logger.info(f"Training complete. Best model was at step {best_step} with accuracy {best_accuracy:.4f}")
+
+    # Final evaluation on dev set
     logger.info("Final evaluation on dev set after training completes.")
-    evaluate(model, tokenizer, dev_loader, device)
-
+    final_accuracy = evaluate(model, tokenizer, dev_loader, device)
+    
+    # Save final model
+    model.save_pretrained(final_model_dir)
+    tokenizer.save_pretrained(final_model_dir)
+    logger.info(f"Final model saved to {final_model_dir} with accuracy {final_accuracy:.4f}")
+    
+    # If the best model is better than the final model, load and return it
+    if best_accuracy > final_accuracy:
+        logger.info(f"Loading best model from step {best_step} (accuracy: {best_accuracy:.4f}) instead of final model (accuracy: {final_accuracy:.4f})")
+        model = T5ForConditionalGeneration.from_pretrained(best_model_dir).to(device)
+    
+    # Copy best model to main output directory for easy access
+    logger.info(f"Copying best model to {output_dir}")
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
-    print(f"Predictor model saved to {output_dir}")
+    
+    print(f"Predictor model training complete. Best model saved to {output_dir}")
+    return model, tokenizer
 
 if __name__ == "__main__":
     main()

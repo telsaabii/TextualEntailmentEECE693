@@ -24,7 +24,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("NLIPredictor")
+logger = logging.getLogger("NLIvanilla")
 
 class NLIPredictorDataset(Dataset):
     """Dataset for NLI prediction task using T5."""
@@ -123,7 +123,7 @@ def main():
     # Optional: integrate wandb
     if config.get("use_wandb", False):
         import wandb
-        wandb.init(project=config.get("wandb_project", "nli-predictor"))
+        wandb.init(project=config.get("wandb_project", "nli-vanilla"))
         wandb.config.update(config)
 
     device = config["device"]
@@ -149,10 +149,19 @@ def main():
 
     optimizer = AdamW(model.parameters(), lr=config["lr"])
 
-    # Create output directory if it doesn't exist
-    os.makedirs(config["output_dir"], exist_ok=True)
+    # Create output directories
+    output_dir = config["output_dir"]
+    os.makedirs(output_dir, exist_ok=True)
+    best_model_dir = os.path.join(output_dir, "best")
+    final_model_dir = os.path.join(output_dir, "final")
+    os.makedirs(best_model_dir, exist_ok=True)
+    os.makedirs(final_model_dir, exist_ok=True)
     
+    # For tracking best model
     best_accuracy = 0.0
+    best_epoch = -1
+    best_global_step = 0
+    
     global_step = 0
     for epoch in range(config["epochs"]):
         logger.info(f"Epoch {epoch + 1}/{config['epochs']}")
@@ -185,23 +194,52 @@ def main():
                 # Save model if it's the best so far
                 if accuracy > best_accuracy:
                     best_accuracy = accuracy
-                    logger.info(f"New best accuracy: {best_accuracy:.4f} - Saving model")
-                    model.save_pretrained(config["output_dir"])
-                    tokenizer.save_pretrained(config["output_dir"])
+                    best_epoch = epoch
+                    best_global_step = global_step
+                    logger.info(f"New best accuracy: {best_accuracy:.4f} at step {global_step} - Saving model")
+                    model.save_pretrained(best_model_dir)
+                    tokenizer.save_pretrained(best_model_dir)
                 
         # Log average epoch loss
         avg_epoch_loss = epoch_loss / len(train_loader)
         logger.info(f"Epoch {epoch + 1} average loss: {avg_epoch_loss:.4f}")
+        
+        # Run full evaluation at the end of each epoch
+        logger.info(f"Full evaluation at the end of epoch {epoch + 1}")
+        accuracy = evaluate(model, tokenizer, dev_loader, device)
+        
+        # Update best model if current epoch is better
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_epoch = epoch
+            best_global_step = global_step
+            logger.info(f"New best accuracy at end of epoch {epoch + 1}: {best_accuracy:.4f} - Saving model")
+            model.save_pretrained(best_model_dir)
+            tokenizer.save_pretrained(best_model_dir)
 
+    logger.info(f"Training complete. Best model was from epoch {best_epoch + 1}, step {best_global_step} with accuracy {best_accuracy:.4f}")
+
+    # Final evaluation on dev set
     logger.info("Final evaluation on dev set after training completes.")
-    evaluate(model, tokenizer, dev_loader, device)
+    final_accuracy = evaluate(model, tokenizer, dev_loader, device)
 
     # Save final model
-    final_output_dir = os.path.join(config["output_dir"], "final")
-    os.makedirs(final_output_dir, exist_ok=True)
-    model.save_pretrained(final_output_dir)
-    tokenizer.save_pretrained(final_output_dir)
-    logger.info(f"Final NLI predictor model saved to {final_output_dir}")
+    model.save_pretrained(final_model_dir)
+    tokenizer.save_pretrained(final_model_dir)
+    logger.info(f"Final model saved to {final_model_dir} with accuracy {final_accuracy:.4f}")
+    
+    # If the best model is better than the final model, load and return it
+    if best_accuracy > final_accuracy:
+        logger.info(f"Loading best model from epoch {best_epoch + 1} (accuracy: {best_accuracy:.4f}) instead of final model (accuracy: {final_accuracy:.4f})")
+        model = T5ForConditionalGeneration.from_pretrained(best_model_dir).to(device)
+    
+    # Copy best model to main output directory for easy access
+    logger.info(f"Copying best model to {output_dir}")
+    model.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
+    
+    print(f"NLI vanilla model training complete. Best model saved to {output_dir}")
+    return model, tokenizer
 
 if __name__ == "__main__":
     main()
