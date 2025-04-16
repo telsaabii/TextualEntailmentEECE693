@@ -1,4 +1,4 @@
-model_name: "t5-explainer"
+model_name: "google/flan-t5-base"
 train_csv: "data/processed/explainer_train.csv"
 dev_csv: "data/processed/explainer_dev.csv"
 output_dir: "checkpoints/explainer"
