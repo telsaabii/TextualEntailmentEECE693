@@ -4,7 +4,7 @@ dev_csv: "data/processed/explainer_dev.csv"
 output_dir: "checkpoints/explainer"
 batch_size: 8
 lr: 3e-5
-epochs: 3
+epochs: 6
 max_len: 128
 target_max_len: 64
 eval_steps: 1000
