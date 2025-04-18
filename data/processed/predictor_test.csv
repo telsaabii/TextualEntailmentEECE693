@@ -1,4 +1,4 @@
-premise,hypothesis,Explanation_1,label
+premise,hypothesis,explanation,label
 This church choir sings to the masses as they sing joyous songs from the book at a church.,The church has cracks in the ceiling.,Not all churches have cracks in the ceiling,neutral
 This church choir sings to the masses as they sing joyous songs from the book at a church.,The church is filled with song.,"""Filled with song"" is a rephrasing of the ""choir sings to the masses.""",entailment
 This church choir sings to the masses as they sing joyous songs from the book at a church.,A choir singing at a baseball game.,A choir sing some other songs other than book at church during the base play. they cannot see book and play base ball same time.,contradiction
